@@ -1137,6 +1137,7 @@ with gr.Blocks(title="Neo RVC Fork WebUI", theme="hev832/Applio") as app:
                     model_choose = gr.Dropdown(label=("UVR Model"), choices=uvr_models)
                     
                 vc_output4 = gr.Textbox(label=i18n("Output information"))
+                but2 = gr.Button("Separate")
                 but2.click(
                     separation,
                     [
