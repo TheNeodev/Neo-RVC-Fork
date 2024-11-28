@@ -1142,7 +1142,7 @@ with gr.Blocks(title="Neo RVC Fork WebUI", theme="hev832/Applio") as app:
                     separation,
                     [
                         model_choose,
-                        audio_input,
+                        dir_input,
                         wav_inputs,
                         
                     ],
