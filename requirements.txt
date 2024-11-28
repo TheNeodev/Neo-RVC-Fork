@@ -1,0 +1,61 @@
+# Core Libraries
+joblib
+numba
+numpy
+scipy
+librosa
+llvmlite
+
+# Machine Learning Frameworks
+fairseq
+faiss-cpu
+torchcrepe
+torchfcpe
+onnxruntime; sys_platform == 'darwin'
+onnxruntime-gpu; sys_platform != 'darwin'
+
+# Visualization and Analysis
+matplotlib
+matplotlib-inline
+tensorboard
+tensorboardX
+tqdm
+Praat-Parselmouth
+Pillow
+tabulate
+
+# Web and API
+gradio
+fastapi
+uvicor
+httpx
+Werkzeug
+python-dotenv
+
+# Audio Processing
+pydub
+audioread
+audio-separator[gpu]
+resampy
+pyworld
+
+# Text Processing
+Jinja2
+json5
+Markdown
+
+# Utilities
+Cython
+PyYAML
+pyasn1
+pyasn1-modules
+fsspec
+sympy
+absl-py
+colorama
+yt_dlp
+av
+pybase16384
+
+# Others
+scikit-learn
