@@ -27,7 +27,6 @@ tabulate
 # Web and API
 gradio
 fastapi
-uvicorn==0.32.1
 httpx
 Werkzeug
 python-dotenv
