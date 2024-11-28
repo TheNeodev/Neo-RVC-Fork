@@ -1,6 +1,30 @@
-import os
 import sys
 from dotenv import load_dotenv
+import os
+from audio_separator.separator import Separator
+
+
+uvr_models = {
+    'BS-Roformer-Viperx-1297': 'model_bs_roformer_ep_317_sdr_12.9755.ckpt',
+    'BS-Roformer-Viperx-1296': 'model_bs_roformer_ep_368_sdr_12.9628.ckpt',
+    'BS-Roformer-Viperx-1053': 'model_bs_roformer_ep_937_sdr_10.5309.ckpt',
+    'Mel-Roformer-Viperx-1143': 'model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt',
+    'BS-Roformer-De-Reverb': 'deverb_bs_roformer_8_384dim_10depth.ckpt',
+    'Mel-Roformer-Crowd-Aufr33-Viperx': 'mel_band_roformer_crowd_aufr33_viperx_sdr_8.7144.ckpt',
+    'Mel-Roformer-Denoise-Aufr33': 'denoise_mel_band_roformer_aufr33_sdr_27.9959.ckpt',
+    'Mel-Roformer-Denoise-Aufr33-Aggr' : 'denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768.ckpt',
+    'Mel-Roformer-Karaoke-Aufr33-Viperx': 'mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956.ckpt',
+    'MelBand Roformer Kim | Inst V1 by Unwa' : 'melband_roformer_inst_v1.ckpt',
+    'MelBand Roformer Kim | Inst V2 by Unwa' : 'melband_roformer_inst_v2.ckpt',
+    'MelBand Roformer Kim | InstVoc Duality V1 by Unwa' : 'melband_roformer_instvoc_duality_v1.ckpt',
+    'MelBand Roformer Kim | InstVoc Duality V2 by Unwa' : 'melband_roformer_instvox_duality_v2.ckpt',
+    'MDX23C-8KFFT-InstVoc_HQ.ckpt',
+    'MDX23C-8KFFT-InstVoc_HQ_2.ckpt',
+    'Kim_Vocal_1.onnx',
+    'Kim_Vocal_2.onnx',
+    'Reverb_HQ_By_FoxJoy.onnx'
+}
+
 
 now_dir = os.getcwd()
 sys.path.append(now_dir)
@@ -742,8 +766,49 @@ def change_info_(ckpt_path):
         return {"__type__": "update"}, {"__type__": "update"}, {"__type__": "update"}
 
 
-with gr.Blocks(title="RVC WebUI") as app:
-    gr.Markdown("## RVC WebUI")
+
+def separation(input_audio, output_dir="output", model_name=None):
+    """
+    Separates vocals and instrumental from an audio file using the selected UVR model.
+
+    Args:
+        input_audio (str): Path to the input audio file.
+        output_dir (str): Path to the directory where output files will be saved.
+        model_name (str): Name of the model to use from the uvr_models dictionary. Defaults to None.
+
+    Returns:
+        tuple: Paths to the separated vocals and instrumental files.
+    """
+    # Create output directory if it doesn't exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    # Initialize the Separator class
+    separator = Separator(output_dir=output_dir)
+    
+    # Retrieve the selected model's file name
+    model_file = uvr_models.get(model_name, None)
+    if not model_file:
+        raise ValueError(f"Invalid model name: '{model_name}'. Please select from: {list(uvr_models.keys())}")
+    
+    # Load the machine learning model
+    separator.load_model(model_file)
+    
+    # Perform separation on the input audio file
+    output_files = separator.separate(input_audio)
+    
+    # Identify vocals and instrumental files
+    vocals_file = next((file for file in output_files if "vocals" in file), None)
+    instrumental_file = next((file for file in output_files if "instrumental" in file), None)
+    
+    print(f"Separation completed. Outputs saved in {output_dir}.")
+    return vocals_file, instrumental_file
+
+
+
+
+with gr.Blocks(title="Neo RVC Fork WebUI", theme="hev832/Applio") as app:
+    gr.Markdown("# Neo RVC Fork WebUI")
     gr.Markdown(
         value=i18n(
             "This software is open source under the MIT license. The author does not have any control over the software. Users who use the software and distribute the sounds exported by the software are solely responsible. <br>If you do not agree with this clause, you cannot use or reference any codes and files within the software package. See the root directory <b>Agreement-LICENSE.txt</b> for details."
@@ -1057,64 +1122,33 @@ with gr.Blocks(title="RVC WebUI") as app:
                     api_name="infer_change_voice",
                 )
         with gr.TabItem(
-            i18n("Vocals/Accompaniment Separation & Reverberation Removal")
-        ):
-            gr.Markdown(
-                value=i18n(
-                    "Batch processing for vocal accompaniment separation using the UVR5 model.<br>Example of a valid folder path format: D:\\path\\to\\input\\folder (copy it from the file manager address bar).<br>The model is divided into three categories:<br>1. Preserve vocals: Choose this option for audio without harmonies. It preserves vocals better than HP5. It includes two built-in models: HP2 and HP3. HP3 may slightly leak accompaniment but preserves vocals slightly better than HP2.<br>2. Preserve main vocals only: Choose this option for audio with harmonies. It may weaken the main vocals. It includes one built-in model: HP5.<br>3. De-reverb and de-delay models (by FoxJoy):<br>  (1) MDX-Net: The best choice for stereo reverb removal but cannot remove mono reverb;<br>&emsp;(234) DeEcho: Removes delay effects. Aggressive mode removes more thoroughly than Normal mode. DeReverb additionally removes reverb and can remove mono reverb, but not very effectively for heavily reverberated high-frequency content.<br>De-reverb/de-delay notes:<br>1. The processing time for the DeEcho-DeReverb model is approximately twice as long as the other two DeEcho models.<br>2. The MDX-Net-Dereverb model is quite slow.<br>3. The recommended cleanest configuration is to apply MDX-Net first and then DeEcho-Aggressive."
-                )
-            )
+            ("UVR (UPDATE)")
+        ):    
             with gr.Row():
                 with gr.Column():
-                    dir_wav_input = gr.Textbox(
-                        label=i18n(
-                            "Enter the path of the audio folder to be processed"
-                        ),
+                    input_audio = gr.Textbox(
+                        label=(
+                            "Enter the path of the audio folder to be processed"  
+                        ),                  
                         placeholder="C:\\Users\\Desktop\\todo-songs",
                     )
                     wav_inputs = gr.File(
                         file_count="multiple",
-                        label=i18n(
+                        label=(
                             "Multiple audio files can also be imported. If a folder path exists, this input is ignored."
                         ),
                     )
                 with gr.Column():
-                    model_choose = gr.Dropdown(label=i18n("Model"), choices=uvr5_names)
-                    agg = gr.Slider(
-                        minimum=0,
-                        maximum=20,
-                        step=1,
-                        label="人声提取激进程度",
-                        value=10,
-                        interactive=True,
-                        visible=False,  # 先不开放调整
-                    )
-                    opt_vocal_root = gr.Textbox(
-                        label=i18n("Specify the output folder for vocals"),
-                        value="opt",
-                    )
-                    opt_ins_root = gr.Textbox(
-                        label=i18n("Specify the output folder for accompaniment"),
-                        value="opt",
-                    )
-                    format0 = gr.Radio(
-                        label=i18n("Export file format"),
-                        choices=["wav", "flac", "mp3", "m4a"],
-                        value="flac",
-                        interactive=True,
-                    )
-                but2 = gr.Button(i18n("Convert"), variant="primary")
+                    model_choose = gr.Dropdown(label=("UVR Model"), choices=uvr_models)
+                    
                 vc_output4 = gr.Textbox(label=i18n("Output information"))
                 but2.click(
-                    uvr,
+                    separation,
                     [
                         model_choose,
-                        dir_wav_input,
-                        opt_vocal_root,
+                        audio_input,
                         wav_inputs,
-                        opt_ins_root,
-                        agg,
-                        format0,
+                        
                     ],
                     [vc_output4],
                     api_name="uvr_convert",
