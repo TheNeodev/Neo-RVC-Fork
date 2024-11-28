@@ -18,11 +18,11 @@ uvr_models = {
     'MelBand Roformer Kim | Inst V2 by Unwa' : 'melband_roformer_inst_v2.ckpt',
     'MelBand Roformer Kim | InstVoc Duality V1 by Unwa' : 'melband_roformer_instvoc_duality_v1.ckpt',
     'MelBand Roformer Kim | InstVoc Duality V2 by Unwa' : 'melband_roformer_instvox_duality_v2.ckpt',
-    'MDX23C-8KFFT-InstVoc_HQ.ckpt',
-    'MDX23C-8KFFT-InstVoc_HQ_2.ckpt',
-    'Kim_Vocal_1.onnx',
-    'Kim_Vocal_2.onnx',
-    'Reverb_HQ_By_FoxJoy.onnx'
+    'MDX23C 8KFFT InstVoc HQ' : 'MDX23C-8KFFT-InstVoc_HQ.ckpt',
+    'MDX23C 8KFFT InstVoc HQ 2', 'MDX23C-8KFFT-InstVoc_HQ_2.ckpt',
+    'Kim Vocal 1', 'Kim_Vocal_1.onnx',
+    'Kim Vocal 1', 'Kim_Vocal_2.onnx',
+    'Reverb HQ By FoxJoy', 'Reverb_HQ_By_FoxJoy.onnx'
 }
 
 
