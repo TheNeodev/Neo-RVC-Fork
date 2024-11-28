@@ -8,7 +8,7 @@ fairseq
 faiss-cpu
 gradio
 Cython
-pydub>
+pydub
 tensorboardX
 Jinja2
 json5
